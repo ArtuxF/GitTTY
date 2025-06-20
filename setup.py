@@ -14,12 +14,12 @@ setup(
             'gittty = gittty:main',
         ],
     },
-    author='Your Name',
-    author_email='your.email@example.com',
+    author='ArtuxF',
+    author_email='aflores98@ucol.mx',
     description='A lifeline to clone your essential Git repositories directly from the TTY.',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/your_username/gittty', # Replace with your repo URL
+    url='https://github.com/ArtuxF/gittty',
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
