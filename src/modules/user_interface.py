@@ -93,6 +93,40 @@ def get_destination_path_interactively():
     return os.path.expanduser(path) if path else None
 
 
+def get_destination_path_interactively(repo_url):
+    """
+    Asks for a destination path with autocompletion and a smart default.
+    """
+    # Suggest a destination name based on the repo URL
+    suggested_name = repo_url.split("/")[-1].replace(".git", "")
+    current_dir_suggestion = os.path.join(os.getcwd(), suggested_name)
+
+    # Options for the user
+    values = [
+        ("default", f"Use default: '{current_dir_suggestion}'"),
+        ("manual", "Enter a path manually"),
+    ]
+
+    choice = radiolist_dialog(
+        title="Choose Destination Path",
+        text="Where do you want to clone the repository?",
+        values=values,
+    ).run()
+
+    if choice == "default":
+        return current_dir_suggestion
+    elif choice == "manual":
+        completer = PathCompleter(expanduser=True)
+        path = prompt(
+            "Enter the destination path: ",
+            completer=completer,
+            complete_while_typing=True,
+        )
+        return os.path.expanduser(path) if path else None
+    
+    return None # User cancelled
+
+
 def confirm_destination(path):
     """
     Checks if a destination path exists and provides appropriate warnings.

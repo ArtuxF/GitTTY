@@ -144,7 +144,7 @@ def run_interactive_mode():
             if not repo_url:
                 continue
 
-            destination_path = get_destination_path_interactively()
+            destination_path = get_destination_path_interactively(repo_url)
             if not destination_path:
                 print("The destination path cannot be empty. Please try again.")
                 continue
