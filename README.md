@@ -4,8 +4,6 @@
 
 GitTTY is a robust and user-friendly TTY tool designed for emergency situations where you only have access to a command-line interface. It allows you to quickly clone, update, and manage your essential Git repositories (like dotfiles or configuration scripts) with ease.
 
-![GitTTY Demo](https://user-images.githubusercontent.com/12345/67890.gif) 
-*(Replace with your actual Asciinema GIF/screenshot)*
 
 ## Core Features
 
