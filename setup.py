@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='gittty',
-    version='0.1.0',
+    version='0.8.0',
     py_modules=['gittty'],
     packages=find_packages(where='src'),
     package_dir={'': 'src'},

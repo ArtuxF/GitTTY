@@ -4,7 +4,10 @@ import shutil
 
 CONFIG_DIR = os.path.expanduser("~/.config/gittty")
 REPOS_FILE_JSON = os.path.join(CONFIG_DIR, "frequent_repos.json")
+CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 REPOS_FILE_TXT_OLD = os.path.join(CONFIG_DIR, "frequent_repos.txt")
+
+DEFAULT_CLONE_DIR = os.path.expanduser("~/dotfiles")
 
 
 def _migrate_from_txt_to_json():
@@ -86,3 +89,34 @@ def remove_frequent_repo(index):
         save_frequent_repos(repos)
         return True
     return False
+
+
+def load_config():
+    """Loads the main configuration file."""
+    if not os.path.exists(CONFIG_FILE):
+        return {"default_clone_dir": DEFAULT_CLONE_DIR}
+    try:
+        with open(CONFIG_FILE, "r") as f:
+            return json.load(f)
+    except (IOError, json.JSONDecodeError):
+        return {"default_clone_dir": DEFAULT_CLONE_DIR}
+
+
+def save_config(config):
+    """Saves the main configuration file."""
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(config, f, indent=4)
+
+
+def get_default_clone_dir():
+    """Gets the default clone directory from the config."""
+    config = load_config()
+    return config.get("default_clone_dir", DEFAULT_CLONE_DIR)
+
+
+def set_default_clone_dir(new_dir):
+    """Sets the default clone directory in the config."""
+    config = load_config()
+    config["default_clone_dir"] = new_dir
+    save_config(config)

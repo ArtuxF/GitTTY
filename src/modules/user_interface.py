@@ -3,6 +3,7 @@ from prompt_toolkit.shortcuts import radiolist_dialog, confirm
 from prompt_toolkit.styles import Style
 from prompt_toolkit.completion import PathCompleter
 import os
+from modules.config_manager import get_default_clone_dir, set_default_clone_dir
 
 
 class Colors:
@@ -87,8 +88,8 @@ def get_destination_path_interactively():
     Asks for a destination path, offering a default and manual entry.
     If the path doesn't exist, it will be created by the clone operation.
     """
-    # Predefined default path
-    default_path = os.path.expanduser("~/dotfiles")
+    # Get the default path from config
+    default_path = get_default_clone_dir()
 
     # Options for the user
     values = [
@@ -160,3 +161,51 @@ def ask_for_shallow_clone():
     return confirm(
         "Do you want to perform a shallow clone? (Downloads only the latest version, faster for large repos)"
     )
+
+
+def manage_settings():
+    """Display the settings menu."""
+    current_dir = get_default_clone_dir()
+    print(f"\nCurrent default clone directory: {current_dir}")
+
+    if confirm("Do you want to change the default clone directory?").run():
+        new_dir = prompt(
+            "Enter the new default clone directory: ",
+            default=current_dir,
+            completer=PathCompleter(),
+        )
+        if new_dir:
+            set_default_clone_dir(os.path.expanduser(new_dir))
+            print(f"Default clone directory updated to: {os.path.expanduser(new_dir)}")
+
+
+def get_repo_action_interactively():
+    """Asks the user what to do with a selected repository."""
+    action = radiolist_dialog(
+        title="Repository Action",
+        text="What do you want to do with this repository?",
+        values=[
+            ("clone_update", "Clone or Update"),
+            ("details", "View Details"),
+            ("remove", "Remove from list"),
+            ("back", "Go Back"),
+        ],
+    ).run()
+    return action
+
+
+def display_repo_details(repo):
+    """Displays the details of a repository."""
+    print("\n--- Repository Details ---")
+    print(f"  Name: {repo.get('name', 'N/A')}")
+    print(f"  URL: {repo.get('url', 'N/A')}")
+    print(f"  Local Path: {repo.get('path', 'Not Cloned Yet')}")
+    print("--------------------------")
+    input("Press Enter to continue...")
+
+
+def ask_to_stash_changes():
+    """Asks the user if they want to stash local changes."""
+    return confirm(
+        "Local changes would be overwritten by pull. Do you want to stash them, pull, and then reapply?"
+    ).run()
