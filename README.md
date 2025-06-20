@@ -1,6 +1,11 @@
 # GitTTY: Your Git Lifeline in a TTY
 
 [![wakatime](https://wakatime.com/badge/user/ce729308-d968-4fab-8b9a-eb4bdc3ddb80/project/7b8ee217-db76-4db7-b6b4-c3e50c886664.svg)](https://wakatime.com/badge/user/ce729308-d968-4fab-8b9a-eb4bdc3ddb80/project/7b8ee217-db76-4db7-b6b4-c3e50c886664)
+[![GitHub last commit](https://img.shields.io/github/last-commit/ArtuxF/GitTTY)](https://github.com/ArtuxF/GitTTY/commits/main)
+[![GitHub Repo stars](https://img.shields.io/github/stars/ArtuxF/GitTTY)](https://github.com/ArtuxF/GitTTY/stargazers)
+[![GitHub repo size](https://img.shields.io/github/repo-size/ArtuxF/GitTTY)](https://github.com/ArtuxF/GitTTY)
+[![GitHub license](https://img.shields.io/github/license/ArtuxF/GitTTY)](https://github.com/ArtuxF/GitTTY/blob/main/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/ArtuxF/GitTTY)](https://github.com/ArtuxF/GitTTY/issues)
 
 GitTTY is a robust and user-friendly TTY tool designed for emergency situations where you only have access to a command-line interface. It allows you to quickly clone, update, and manage your essential Git repositories (like dotfiles or configuration scripts) with ease.
 
