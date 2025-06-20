@@ -11,10 +11,11 @@ GitTTY is a robust and user-friendly TTY tool designed for emergency situations 
 
 *   **Interactive Menus**: A simple, menu-driven interface that guides you through every operation.
 *   **Smart URL Builder**: No need to type full URLs. Quickly build links for GitHub or GitLab (both HTTPS and SSH).
+*   **Smart Destination Path**: Suggests a default cloning directory (e.g., `~/dotfiles`) and allows manual entry with path autocompletion.
 *   **Frequent Repositories**: Save your most-used repositories with friendly names for quick access later.
 *   **Update Existing Repos**: Pull the latest changes for any repository you've previously cloned and saved.
+*   **Self-Update**: Update GitTTY to the latest version directly from the main menu.
 *   **Post-Clone Script Execution**: Automatically run an installation or setup script right after cloning.
-*   **Easy Update GitTTY**: Implemented an option to update GitTTY.
 *   **Branch & Tag Selection**: Choose a specific branch or tag to clone.
 *   **Shallow Clone Support**: Option to perform a shallow clone (`--depth 1`) to save time and disk space.
 *   **User-Friendly Error Messages**: Translates common Git errors into clear, understandable advice.

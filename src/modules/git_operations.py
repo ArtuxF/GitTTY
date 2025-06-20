@@ -2,6 +2,23 @@ import subprocess
 import os
 import shutil
 import socket
+import itertools
+import threading
+import time
+
+
+def spinner_animation(stop_event):
+    """Displays a spinner animation in the console."""
+    spinner = itertools.cycle(["-", "/", "|", "\\"])
+    while not stop_event.is_set():
+        try:
+            print(f"  {next(spinner)} Processing...", end="\r", flush=True)
+            time.sleep(0.1)
+        except (BrokenPipeError, OSError):
+            # Handle cases where stdout is closed or unavailable
+            break
+    # Clear the spinner line
+    print(" " * 20, end="\r", flush=True)
 
 
 def translate_git_error(stderr):
@@ -79,65 +96,52 @@ def check_git_installed():
 
 def clone_repository(repo_url, destination_path, branch_or_tag=None, shallow=False):
     """
-    Executes the git clone command.
-    Handles real-time output to show progress.
+    Executes the git clone command with a visual spinner.
     """
     print(f"\nCloning '{repo_url}' into '{destination_path}'...")
-    print("Please wait, output will be shown after the command completes...")
+
+    command = ["git", "clone"]
+    if branch_or_tag:
+        command.extend(["--branch", branch_or_tag])
+    if shallow:
+        command.extend(["--depth", "1"])
+    command.extend([repo_url, destination_path])
+
+    # Event to signal the spinner to stop
+    stop_spinner = threading.Event()
+
+    # Start the spinner in a separate thread
+    spinner_thread = threading.Thread(target=spinner_animation, args=(stop_spinner,))
+    spinner_thread.start()
 
     try:
-        # The git clone command will create the destination directory.
-        # We've already checked for existence and permissions in the main script.
-        command = ["git", "clone"]
-
-        # If a branch or tag is specified, append it to the command
-        if branch_or_tag:
-            command.extend(["--branch", branch_or_tag])
-
-        # If shallow clone is requested, add the depth flag
-        if shallow:
-            command.extend(["--depth", "1"])
-
-        command.extend([repo_url, destination_path])
-
-        # Execute the command and capture the output
+        # Execute the git command
         process = subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
-
-        # Use communicate() to safely read all output and avoid deadlocks
         stdout, stderr = process.communicate()
 
-        # Display Git's output. Clone progress is usually on stderr.
-        if stderr:
-            # Don't print progress bars, just the final status
-            final_stderr = "\n".join(
-                [
-                    line
-                    for line in stderr.splitlines()
-                    if not line.startswith("Receiving objects")
-                    and not line.startswith("Resolving deltas")
-                ]
-            )
-            print(final_stderr.strip())
-        if stdout:
-            print(stdout, end="")
+        # Signal the spinner to stop
+        stop_spinner.set()
+        spinner_thread.join()  # Wait for the spinner thread to finish
 
         if process.returncode == 0:
-            print("\nRepository cloned successfully!")
+            print("Repository cloned successfully!")
+            # Optional: Print final git output if needed
+            # if stderr:
+            #     print(stderr.strip())
+            # if stdout:
+            #     print(stdout.strip())
             return True
         else:
             print("\n--- Error Cloning Repository ---")
             print(translate_git_error(stderr))
             return False
-
-    except FileNotFoundError:
-        print(
-            "Error: The 'git' command was not found. Make sure Git is installed and in your PATH."
-        )
-        return False
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        # Ensure the spinner stops even if an exception occurs
+        stop_spinner.set()
+        spinner_thread.join()
+        print(f"\nAn unexpected error occurred: {e}")
         return False
 
 
@@ -199,32 +203,30 @@ def execute_script_in_repo(script_path, repo_path):
 
 
 def pull_repository(repo_path):
-    """Executes git pull in a given repository directory."""
+    """Executes git pull with a visual spinner."""
     if not os.path.isdir(os.path.join(repo_path, ".git")):
         print(f"Error: '{repo_path}' is not a valid Git repository.")
         return False
 
     print(f"\n--- Attempting to pull updates for {repo_path} ---")
-    print("Please wait, output will be shown after the command completes...")
+
+    stop_spinner = threading.Event()
+    spinner_thread = threading.Thread(target=spinner_animation, args=(stop_spinner,))
+    spinner_thread.start()
+
     try:
         process = subprocess.Popen(
-            ["git", "pull"],
-            cwd=repo_path,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
+            ["git", "pull"], cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
-
-        # Use communicate() to safely read all output and avoid deadlocks
         stdout, stderr = process.communicate()
 
-        if stderr:
-            print(stderr, end="")
-        if stdout:
-            print(stdout, end="")
+        stop_spinner.set()
+        spinner_thread.join()
 
         if process.returncode == 0:
-            print("\n--- Repository updated successfully! ---")
+            print("Repository updated successfully!")
+            if stdout:
+                print(stdout.strip())
             return True
         else:
             print("\n--- Error Pulling Repository ---")
@@ -232,6 +234,8 @@ def pull_repository(repo_path):
             return False
 
     except Exception as e:
+        stop_spinner.set()
+        spinner_thread.join()
         print(f"An unexpected error occurred during git pull: {e}")
         return False
 
