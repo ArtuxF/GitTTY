@@ -83,27 +83,16 @@ def get_repo_url_interactively():
 
 
 def get_destination_path_interactively():
-    """Asks for a destination path with autocompletion."""
-    completer = PathCompleter(expanduser=True)
-    path = prompt(
-        "Enter the destination path (e.g., /home/user/dotfiles): ",
-        completer=completer,
-        complete_while_typing=True,
-    )
-    return os.path.expanduser(path) if path else None
-
-
-def get_destination_path_interactively(repo_url):
     """
-    Asks for a destination path with autocompletion and a smart default.
+    Asks for a destination path, offering a default and manual entry.
+    If the path doesn't exist, it will be created by the clone operation.
     """
-    # Suggest a destination name based on the repo URL
-    suggested_name = repo_url.split("/")[-1].replace(".git", "")
-    current_dir_suggestion = os.path.join(os.getcwd(), suggested_name)
+    # Predefined default path
+    default_path = os.path.expanduser("~/dotfiles")
 
     # Options for the user
     values = [
-        ("default", f"Use default: '{current_dir_suggestion}'"),
+        ("default", f"Use default path: '{default_path}'"),
         ("manual", "Enter a path manually"),
     ]
 
@@ -113,18 +102,28 @@ def get_destination_path_interactively(repo_url):
         values=values,
     ).run()
 
+    destination_path = None
     if choice == "default":
-        return current_dir_suggestion
+        destination_path = default_path
     elif choice == "manual":
         completer = PathCompleter(expanduser=True)
-        path = prompt(
+        path_input = prompt(
             "Enter the destination path: ",
             completer=completer,
             complete_while_typing=True,
         )
-        return os.path.expanduser(path) if path else None
-    
-    return None # User cancelled
+        if path_input:
+            destination_path = os.path.expanduser(path_input)
+
+    if not destination_path:
+        return None  # User cancelled or entered empty path
+
+    # The git clone command will create the directory. We just need to confirm
+    # if it already exists and is not empty.
+    if confirm_destination(destination_path):
+        return destination_path
+    else:
+        return None  # User chose not to proceed
 
 
 def confirm_destination(path):

@@ -234,3 +234,21 @@ def pull_repository(repo_path):
     except Exception as e:
         print(f"An unexpected error occurred during git pull: {e}")
         return False
+
+
+def get_repo_root():
+    """Finds the root directory of the GitTTY repository."""
+    try:
+        # Start from the directory of the current script
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        # Go up until we find a .git directory
+        while current_dir != "/":
+            if os.path.isdir(os.path.join(current_dir, ".git")):
+                return current_dir
+            current_dir = os.path.dirname(current_dir)
+        return None  # Reached root without finding .git
+    except Exception:
+        # Fallback for environments where __file__ is not defined
+        if os.path.isdir(os.path.join(os.getcwd(), ".git")):
+            return os.getcwd()
+        return None

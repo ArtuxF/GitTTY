@@ -18,6 +18,7 @@ from modules.git_operations import (
     check_git_installed,
     check_connectivity,
     pull_repository,
+    get_repo_root,
 )
 from modules.config_manager import (
     load_frequent_repos,
@@ -66,6 +67,7 @@ def run_interactive_mode():
             print("2. Select from frequent repositories to clone")
             print("3. Manage frequent repositories")
             print("4. Update an existing repository")
+            print("5. Update GitTTY")
             print("q. Quit")
             print("-------------------")
 
@@ -135,6 +137,21 @@ def run_interactive_mode():
                     print("Invalid selection.")
 
                 continue
+            elif choice == "5":
+                if not check_connectivity():
+                    continue
+                gittty_repo_path = get_repo_root()
+                if gittty_repo_path:
+                    print(f"Found GitTTY repository at: {gittty_repo_path}")
+                    pull_repository(gittty_repo_path)
+                    print(
+                        "\nUpdate complete. If there were any changes, please restart the application."
+                    )
+                else:
+                    print(
+                        "Could not find the GitTTY repository. This command only works if you installed via 'git clone'."
+                    )
+                continue
             elif choice.lower() == "q":
                 break
             else:
@@ -144,7 +161,7 @@ def run_interactive_mode():
             if not repo_url:
                 continue
 
-            destination_path = get_destination_path_interactively(repo_url)
+            destination_path = get_destination_path_interactively()
             if not destination_path:
                 print("The destination path cannot be empty. Please try again.")
                 continue
