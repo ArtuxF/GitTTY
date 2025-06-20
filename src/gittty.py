@@ -11,6 +11,7 @@ from modules.user_interface import (
     confirm_destination,
     get_branch_or_tag_interactively,
     ask_for_shallow_clone,
+    manage_settings,
 )
 from modules.git_operations import (
     clone_repository,
@@ -67,7 +68,8 @@ def run_interactive_mode():
             print("2. Select from frequent repositories to clone")
             print("3. Manage frequent repositories")
             print("4. Update an existing repository")
-            print("5. Update GitTTY")
+            print("5. Settings")
+            print("6. Update GitTTY")
             print("q. Quit")
             print("-------------------")
 
@@ -138,6 +140,9 @@ def run_interactive_mode():
 
                 continue
             elif choice == "5":
+                manage_settings()
+                continue
+            elif choice == "6":
                 if not check_connectivity():
                     continue
                 gittty_repo_path = get_repo_root()

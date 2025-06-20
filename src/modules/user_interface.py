@@ -3,32 +3,71 @@ from prompt_toolkit.shortcuts import radiolist_dialog, confirm
 from prompt_toolkit.styles import Style
 from prompt_toolkit.completion import PathCompleter
 import os
-from modules.config_manager import get_default_clone_dir, set_default_clone_dir
+from modules.config_manager import get_default_clone_dir, set_default_clone_dir, get_theme, set_theme
 from modules.git_operations import is_git_repo, pull_repository
+from modules.themes import get_theme as get_theme_object, get_available_themes, get_theme_preview
 
 
 class Colors:
-    HEADER = "\033[95m"
-    OKBLUE = "\033[94m"
-    OKCYAN = "\033[96m"
-    OKGREEN = "\033[92m"
-    WARNING = "\033[93m"
-    FAIL = "\033[91m"
-    ENDC = "\033[0m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
+    """Dynamic color class that loads colors from the current theme."""
+    
+    @staticmethod
+    def _get_current_theme():
+        """Get the current theme object."""
+        theme_name = get_theme()
+        return get_theme_object(theme_name)
+    
+    @property
+    def HEADER(self):
+        return self._get_current_theme().get_color("header")
+    
+    @property
+    def OKBLUE(self):
+        return self._get_current_theme().get_color("info")
+    
+    @property
+    def OKCYAN(self):
+        return self._get_current_theme().get_color("cyan")
+    
+    @property
+    def OKGREEN(self):
+        return self._get_current_theme().get_color("success")
+    
+    @property
+    def WARNING(self):
+        return self._get_current_theme().get_color("warning")
+    
+    @property
+    def FAIL(self):
+        return self._get_current_theme().get_color("error")
+    
+    @property
+    def ENDC(self):
+        return self._get_current_theme().get_color("reset")
+    
+    @property
+    def BOLD(self):
+        return self._get_current_theme().get_color("bold")
+    
+    @property
+    def UNDERLINE(self):
+        return self._get_current_theme().get_color("underline")
+
+
+# Create a global instance
+colors = Colors()
 
 
 def display_welcome():
     """Displays a welcome message on the TTY."""
     print(
-        f"{Colors.HEADER}--------------------------------------------------{Colors.ENDC}"
+        f"{colors.HEADER}--------------------------------------------------{colors.ENDC}"
     )
     print(
-        f"{Colors.HEADER}       Welcome to GitTTY - Your Git lifeline      {Colors.ENDC}"
+        f"{colors.HEADER}       Welcome to GitTTY - Your Git lifeline      {colors.ENDC}"
     )
     print(
-        f"{Colors.HEADER}--------------------------------------------------{Colors.ENDC}"
+        f"{colors.HEADER}--------------------------------------------------{colors.ENDC}"
     )
     print("Clone your essential repositories directly from the TTY.\n")
 
@@ -137,7 +176,7 @@ def confirm_destination(path):
         if os.path.isdir(path) and os.listdir(path):
             if is_git_repo(path):
                 print(
-                    f"{Colors.OKCYAN}The destination '{path}' is already a Git repository.{Colors.ENDC}"
+                    f"{colors.OKCYAN}The destination '{path}' is already a Git repository.{colors.ENDC}"
                 )
                 if confirm("Do you want to pull the latest changes instead?").run():
                     return "pull"
@@ -145,7 +184,7 @@ def confirm_destination(path):
                     return None  # User chose not to pull
             else:
                 print(
-                    f"{Colors.WARNING}Warning: The destination directory '{path}' already exists and is not empty.{Colors.ENDC}"
+                    f"{colors.WARNING}Warning: The destination directory '{path}' already exists and is not empty.{colors.ENDC}"
                 )
                 if confirm(
                     "Do you want to attempt to clone into this directory anyway?"
@@ -155,7 +194,7 @@ def confirm_destination(path):
                     return None  # User chose not to proceed
         elif os.path.isfile(path):
             print(
-                f"{Colors.FAIL}Error: The destination path '{path}' exists and is a file. Please choose a different path.{Colors.ENDC}"
+                f"{colors.FAIL}Error: The destination path '{path}' exists and is a file. Please choose a different path.{colors.ENDC}"
             )
             return None
     return "clone"  # Path doesn't exist or is an empty dir, so proceed with clone.
@@ -178,18 +217,81 @@ def ask_for_shallow_clone():
 
 def manage_settings():
     """Display the settings menu."""
-    current_dir = get_default_clone_dir()
-    print(f"\nCurrent default clone directory: {current_dir}")
+    while True:
+        print(f"\n{colors.HEADER}--- Settings ---{colors.ENDC}")
+        print("1. Change default clone directory")
+        print("2. Change theme")
+        print("3. Back to main menu")
+        print("-------------------")
+        
+        choice = input("Select an option: ").strip()
+        
+        if choice == "1":
+            current_dir = get_default_clone_dir()
+            print(f"\nCurrent default clone directory: {colors.OKCYAN}{current_dir}{colors.ENDC}")
+            
+            if confirm("Do you want to change the default clone directory?").run():
+                new_dir = prompt(
+                    "Enter the new default clone directory: ",
+                    default=current_dir,
+                    completer=PathCompleter(),
+                )
+                if new_dir:
+                    set_default_clone_dir(os.path.expanduser(new_dir))
+                    print(f"{colors.OKGREEN}Default clone directory updated to: {os.path.expanduser(new_dir)}{colors.ENDC}")
+        
+        elif choice == "2":
+            manage_theme_settings()
+        
+        elif choice == "3":
+            break
+        
+        else:
+            print(f"{colors.WARNING}Invalid option. Please try again.{colors.ENDC}")
 
-    if confirm("Do you want to change the default clone directory?").run():
-        new_dir = prompt(
-            "Enter the new default clone directory: ",
-            default=current_dir,
-            completer=PathCompleter(),
-        )
-        if new_dir:
-            set_default_clone_dir(os.path.expanduser(new_dir))
-            print(f"Default clone directory updated to: {os.path.expanduser(new_dir)}")
+
+def manage_theme_settings():
+    """Manage theme settings."""
+    current_theme = get_theme()
+    available_themes = get_available_themes()
+    
+    print(f"\n{colors.HEADER}--- Theme Settings ---{colors.ENDC}")
+    print(f"Current theme: {colors.OKCYAN}{current_theme}{colors.ENDC}")
+    print("\nAvailable themes:")
+    
+    # Show theme previews
+    for i, theme_name in enumerate(available_themes, 1):
+        preview = get_theme_preview(theme_name)
+        current_marker = " (current)" if theme_name == current_theme else ""
+        print(f"  {i}. {theme_name.title()}{current_marker}: {preview}")
+    
+    print(f"  {len(available_themes) + 1}. Back")
+    print("-" * 50)
+    
+    try:
+        choice = input("Select a theme by number: ").strip()
+        if choice.isdigit():
+            choice_num = int(choice)
+            if 1 <= choice_num <= len(available_themes):
+                selected_theme = available_themes[choice_num - 1]
+                if selected_theme != current_theme:
+                    set_theme(selected_theme)
+                    print(f"{colors.OKGREEN}Theme changed to '{selected_theme}'. Changes will take effect immediately.{colors.ENDC}")
+                    # Force reload colors by creating a new instance
+                    global colors
+                    colors = Colors()
+                else:
+                    print(f"{colors.WARNING}Theme '{selected_theme}' is already selected.{colors.ENDC}")
+            elif choice_num == len(available_themes) + 1:
+                return
+            else:
+                print(f"{colors.WARNING}Invalid selection.{colors.ENDC}")
+        else:
+            print(f"{colors.WARNING}Please enter a valid number.{colors.ENDC}")
+    except ValueError:
+        print(f"{colors.WARNING}Invalid input.{colors.ENDC}")
+    
+    input("Press Enter to continue...")
 
 
 def get_repo_action_interactively():

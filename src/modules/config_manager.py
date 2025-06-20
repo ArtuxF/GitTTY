@@ -8,6 +8,7 @@ CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 REPOS_FILE_TXT_OLD = os.path.join(CONFIG_DIR, "frequent_repos.txt")
 
 DEFAULT_CLONE_DIR = os.path.expanduser("~/dotfiles")
+DEFAULT_THEME = "default"
 
 
 def _migrate_from_txt_to_json():
@@ -94,12 +95,24 @@ def remove_frequent_repo(index):
 def load_config():
     """Loads the main configuration file."""
     if not os.path.exists(CONFIG_FILE):
-        return {"default_clone_dir": DEFAULT_CLONE_DIR}
+        return {
+            "default_clone_dir": DEFAULT_CLONE_DIR,
+            "theme": DEFAULT_THEME,
+        }
     try:
         with open(CONFIG_FILE, "r") as f:
-            return json.load(f)
+            config = json.load(f)
+            # Ensure all default values are present
+            if "theme" not in config:
+                config["theme"] = DEFAULT_THEME
+            if "default_clone_dir" not in config:
+                config["default_clone_dir"] = DEFAULT_CLONE_DIR
+            return config
     except (IOError, json.JSONDecodeError):
-        return {"default_clone_dir": DEFAULT_CLONE_DIR}
+        return {
+            "default_clone_dir": DEFAULT_CLONE_DIR,
+            "theme": DEFAULT_THEME,
+        }
 
 
 def save_config(config):
@@ -119,4 +132,17 @@ def set_default_clone_dir(new_dir):
     """Sets the default clone directory in the config."""
     config = load_config()
     config["default_clone_dir"] = new_dir
+    save_config(config)
+
+
+def get_theme():
+    """Gets the current theme from the config."""
+    config = load_config()
+    return config.get("theme", DEFAULT_THEME)
+
+
+def set_theme(theme_name):
+    """Sets the theme in the config."""
+    config = load_config()
+    config["theme"] = theme_name
     save_config(config)

@@ -94,6 +94,11 @@ def check_git_installed():
     return True
 
 
+def is_git_repo(path):
+    """Check if the given path is a git repository."""
+    return os.path.isdir(os.path.join(path, ".git"))
+
+
 def clone_repository(repo_url, destination_path, branch_or_tag=None, shallow=False):
     """
     Executes the git clone command with a visual spinner.
