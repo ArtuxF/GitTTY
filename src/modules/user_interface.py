@@ -3,9 +3,15 @@ from prompt_toolkit.shortcuts import radiolist_dialog, confirm
 from prompt_toolkit.styles import Style
 from prompt_toolkit.completion import PathCompleter
 import os
-from modules.config_manager import get_default_clone_dir, set_default_clone_dir, get_theme, set_theme
+from modules.config_manager import get_default_clone_dir, set_default_clone_dir, get_theme, set_theme, load_frequent_repos
 from modules.git_operations import is_git_repo, pull_repository
 from modules.themes import get_theme as get_theme_object, get_available_themes, get_theme_preview
+
+try:
+    from fuzzywuzzy import fuzz, process
+    FUZZY_SEARCH_AVAILABLE = True
+except ImportError:
+    FUZZY_SEARCH_AVAILABLE = False
 
 
 class Colors:
@@ -324,3 +330,137 @@ def ask_to_stash_changes():
     return confirm(
         "Local changes would be overwritten by pull. Do you want to stash them, pull, and then reapply?"
     ).run()
+
+
+def search_frequent_repos():
+    """Search through frequent repositories."""
+    repos = load_frequent_repos()
+    
+    if not repos:
+        print(f"{colors.WARNING}No frequent repositories found to search.{colors.ENDC}")
+        input("Press Enter to continue...")
+        return None
+    
+    print(f"\n{colors.HEADER}--- Search Repositories ---{colors.ENDC}")
+    
+    if not FUZZY_SEARCH_AVAILABLE:
+        print(f"{colors.WARNING}Note: Advanced fuzzy search is not available. Install 'fuzzywuzzy' for better search results.{colors.ENDC}")
+    
+    search_query = input("Enter search term (name or URL): ").strip()
+    
+    if not search_query:
+        print(f"{colors.WARNING}Search term cannot be empty.{colors.ENDC}")
+        input("Press Enter to continue...")
+        return None
+    
+    # Perform search
+    matching_repos = []
+    
+    if FUZZY_SEARCH_AVAILABLE:
+        # Use fuzzy matching for better results
+        repo_strings = []
+        for i, repo in enumerate(repos):
+            search_string = f"{repo.get('name', '')} {repo.get('url', '')}"
+            repo_strings.append((search_string, i))
+        
+        # Extract just the strings for fuzzy matching
+        strings_only = [item[0] for item in repo_strings]
+        
+        # Get fuzzy matches (threshold of 60 for reasonable results)
+        fuzzy_results = process.extract(search_query, strings_only, limit=len(strings_only))
+        
+        for match_string, score in fuzzy_results:
+            if score >= 60:  # Minimum similarity threshold
+                # Find the original repo index
+                repo_index = next(i for string, i in repo_strings if string == match_string)
+                matching_repos.append((repos[repo_index], score))
+        
+        # Sort by score (best matches first)
+        matching_repos.sort(key=lambda x: x[1], reverse=True)
+        matching_repos = [repo for repo, score in matching_repos]  # Remove scores for display
+        
+    else:
+        # Simple string matching fallback
+        search_lower = search_query.lower()
+        for repo in repos:
+            name = repo.get('name', '').lower()
+            url = repo.get('url', '').lower()
+            if search_lower in name or search_lower in url:
+                matching_repos.append(repo)
+    
+    if not matching_repos:
+        print(f"{colors.WARNING}No repositories found matching '{search_query}'.{colors.ENDC}")
+        input("Press Enter to continue...")
+        return None
+    
+    # Display results
+    print(f"\n{colors.OKGREEN}Found {len(matching_repos)} matching repositories:{colors.ENDC}")
+    for i, repo in enumerate(matching_repos, 1):
+        path_info = f" -> {repo.get('path', 'Not cloned')}"
+        print(f"  {i}. {colors.OKCYAN}{repo.get('name')}{colors.ENDC} ({repo.get('url')}){path_info}")
+    
+    print(f"  {len(matching_repos) + 1}. Back to search")
+    print("-" * 50)
+    
+    try:
+        choice = input("Select a repository by number: ").strip()
+        if choice.isdigit():
+            choice_num = int(choice)
+            if 1 <= choice_num <= len(matching_repos):
+                return matching_repos[choice_num - 1]
+            elif choice_num == len(matching_repos) + 1:
+                return None
+            else:
+                print(f"{colors.WARNING}Invalid selection.{colors.ENDC}")
+                input("Press Enter to continue...")
+                return None
+        else:
+            print(f"{colors.WARNING}Please enter a valid number.{colors.ENDC}")
+            input("Press Enter to continue...")
+            return None
+    except ValueError:
+        print(f"{colors.WARNING}Invalid input.{colors.ENDC}")
+        input("Press Enter to continue...")
+        return None
+
+def browse_frequent_repos():
+    """Browse and select from frequent repositories with search option."""
+    while True:
+        repos = load_frequent_repos()
+        
+        if not repos:
+            print(f"{colors.WARNING}No frequent repositories found.{colors.ENDC}")
+            input("Press Enter to continue...")
+            return None
+        
+        print(f"\n{colors.HEADER}--- Frequent Repositories ---{colors.ENDC}")
+        
+        # Show all repositories
+        for i, repo in enumerate(repos, 1):
+            path_info = f" -> {repo.get('path', 'Not cloned')}"
+            print(f"  {i}. {colors.OKCYAN}{repo.get('name')}{colors.ENDC} ({repo.get('url')}){path_info}")
+        
+        print(f"\n  {len(repos) + 1}. Search repositories")
+        print(f"  {len(repos) + 2}. Back to main menu")
+        print("-" * 50)
+        
+        choice = input("Select an option: ").strip()
+        
+        if choice.isdigit():
+            choice_num = int(choice)
+            if 1 <= choice_num <= len(repos):
+                return repos[choice_num - 1]
+            elif choice_num == len(repos) + 1:
+                # Search functionality
+                selected_repo = search_frequent_repos()
+                if selected_repo:
+                    return selected_repo
+                # If no repo selected from search, continue the loop
+            elif choice_num == len(repos) + 2:
+                return None
+            else:
+                print(f"{colors.WARNING}Invalid selection.{colors.ENDC}")
+                input("Press Enter to continue...")
+        else:
+            print(f"{colors.WARNING}Please enter a valid number.{colors.ENDC}")
+            input("Press Enter to continue...")

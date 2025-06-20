@@ -21,6 +21,8 @@ GitTTY is a robust and user-friendly TTY tool designed for emergency situations 
     *   Clone or Update repositories
     *   View detailed repository information (URL, local path, etc.)
     *   Remove repositories from your frequent list
+    *   **Search functionality**: Quickly find repositories using fuzzy search (supports partial matches and typos)
+*   **Customizable Themes**: Choose from 7 predefined color themes (Default, Dark, Light, Cyberpunk, Ocean, Forest, Monochrome) or use a monochrome mode for terminals without color support.
 *   **Smart Repository Detection**: Automatically detects if a destination directory is already a Git repository and offers to pull updates instead of cloning.
 *   **Visual Progress Indicators**: Spinner animations during long-running operations like cloning and pulling to provide real-time feedback.
 *   **Auto-Stash Integration**: When pulling updates, if local changes would be overwritten, GitTTY offers to automatically stash changes, pull, and reapply them.
@@ -81,10 +83,12 @@ GitTTY is built with a modular architecture in Python:
 
 ### New in Recent Updates
 
-*   **Enhanced Repository Management**: Detailed view and management options for frequent repositories
+*   **Enhanced Repository Management**: Detailed view and management options for frequent repositories with integrated search functionality
 *   **Smart Conflict Resolution**: Automatic stash/unstash workflow for handling local changes during pulls
 *   **Visual Feedback**: Real-time progress indicators during Git operations
-*   **Flexible Configuration**: Customizable default clone directory through the Settings menu
+*   **Flexible Configuration**: Customizable default clone directory and theme selection through the Settings menu
 *   **Intelligent Directory Handling**: Automatic detection of existing Git repositories with pull suggestions
+*   **Search & Discovery**: Fuzzy search through your frequent repositories with tolerance for typos and partial matches
+*   **Theme System**: Multiple color schemes to customize the visual experience for different terminal preferences
 
 This structure makes the tool easy to maintain and extend while providing a smooth user experience even in emergency TTY-only scenarios.
