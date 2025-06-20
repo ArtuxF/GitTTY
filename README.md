@@ -11,9 +11,14 @@ GitTTY is a robust and user-friendly TTY tool designed for emergency situations 
 
 *   **Interactive Menus**: A simple, menu-driven interface that guides you through every operation.
 *   **Smart URL Builder**: No need to type full URLs. Quickly build links for GitHub or GitLab (both HTTPS and SSH).
-*   **Smart Destination Path**: Suggests a default cloning directory (e.g., `~/dotfiles`) and allows manual entry with path autocompletion.
-*   **Frequent Repositories**: Save your most-used repositories with friendly names for quick access later.
-*   **Update Existing Repos**: Pull the latest changes for any repository you've previously cloned and saved.
+*   **Configurable Default Directory**: Set and customize your default cloning directory through the Settings menu.
+*   **Frequent Repositories Management**: Save your most-used repositories with friendly names and manage them with detailed actions:
+    *   Clone or Update repositories
+    *   View detailed repository information (URL, local path, etc.)
+    *   Remove repositories from your frequent list
+*   **Smart Repository Detection**: Automatically detects if a destination directory is already a Git repository and offers to pull updates instead of cloning.
+*   **Visual Progress Indicators**: Spinner animations during long-running operations like cloning and pulling to provide real-time feedback.
+*   **Auto-Stash Integration**: When pulling updates, if local changes would be overwritten, GitTTY offers to automatically stash changes, pull, and reapply them.
 *   **Self-Update**: Update GitTTY to the latest version directly from the main menu.
 *   **Post-Clone Script Execution**: Automatically run an installation or setup script right after cloning.
 *   **Branch & Tag Selection**: Choose a specific branch or tag to clone.
@@ -65,8 +70,16 @@ You can also use flags for quick help or version checking:
 GitTTY is built with a modular architecture in Python:
 
 *   `gittty.py`: The main entry point, handling command-line arguments and the interactive menu logic.
-*   `modules/user_interface.py`: Manages all user interaction, including menus, prompts, and confirmations using `prompt-toolkit`.
-*   `modules/git_operations.py`: Handles all Git commands (`clone`, `pull`) and provides user-friendly error translation.
-*   `modules/config_manager.py`: Manages the list of frequent repositories, storing them in `~/.config/gittty/frequent_repos.json`.
+*   `modules/user_interface.py`: Manages all user interaction, including menus, prompts, and confirmations using `prompt-toolkit`. Provides visual feedback and repository management dialogs.
+*   `modules/git_operations.py`: Handles all Git commands (`clone`, `pull`, `stash`) with visual progress indicators and provides user-friendly error translation.
+*   `modules/config_manager.py`: Manages both frequent repositories and user settings (like default clone directory), storing them in `~/.config/gittty/` as JSON files.
 
-This structure makes the tool easy to maintain and extend.
+### New in Recent Updates
+
+*   **Enhanced Repository Management**: Detailed view and management options for frequent repositories
+*   **Smart Conflict Resolution**: Automatic stash/unstash workflow for handling local changes during pulls
+*   **Visual Feedback**: Real-time progress indicators during Git operations
+*   **Flexible Configuration**: Customizable default clone directory through the Settings menu
+*   **Intelligent Directory Handling**: Automatic detection of existing Git repositories with pull suggestions
+
+This structure makes the tool easy to maintain and extend while providing a smooth user experience even in emergency TTY-only scenarios.

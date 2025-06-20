@@ -4,6 +4,7 @@ from prompt_toolkit.styles import Style
 from prompt_toolkit.completion import PathCompleter
 import os
 from modules.config_manager import get_default_clone_dir, set_default_clone_dir
+from modules.git_operations import is_git_repo, pull_repository
 
 
 class Colors:
@@ -130,22 +131,34 @@ def get_destination_path_interactively():
 def confirm_destination(path):
     """
     Checks if a destination path exists and provides appropriate warnings.
-    Returns True to proceed, False to cancel.
+    Returns 'clone', 'pull', or None.
     """
     if os.path.exists(path):
         if os.path.isdir(path) and os.listdir(path):
-            print(
-                f"{Colors.WARNING}Warning: The destination directory '{path}' already exists and is not empty.{Colors.ENDC}"
-            )
-            return confirm(
-                "Do you want to attempt to clone into this directory anyway?"
-            )
+            if is_git_repo(path):
+                print(
+                    f"{Colors.OKCYAN}The destination '{path}' is already a Git repository.{Colors.ENDC}"
+                )
+                if confirm("Do you want to pull the latest changes instead?").run():
+                    return "pull"
+                else:
+                    return None  # User chose not to pull
+            else:
+                print(
+                    f"{Colors.WARNING}Warning: The destination directory '{path}' already exists and is not empty.{Colors.ENDC}"
+                )
+                if confirm(
+                    "Do you want to attempt to clone into this directory anyway?"
+                ).run():
+                    return "clone"  # User chose to proceed with cloning
+                else:
+                    return None  # User chose not to proceed
         elif os.path.isfile(path):
             print(
                 f"{Colors.FAIL}Error: The destination path '{path}' exists and is a file. Please choose a different path.{Colors.ENDC}"
             )
-            return False
-    return True  # Path doesn't exist or is an empty dir, so proceed.
+            return None
+    return "clone"  # Path doesn't exist or is an empty dir, so proceed with clone.
 
 
 def get_branch_or_tag_interactively():
