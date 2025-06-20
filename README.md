@@ -22,7 +22,7 @@ GitTTY is a robust and user-friendly TTY tool designed for emergency situations 
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/your-username/GitTTY.git
+    git clone https://github.com/ArtuxF/GitTTY.git
     cd GitTTY
     ```
 
