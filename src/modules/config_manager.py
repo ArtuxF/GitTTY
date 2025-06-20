@@ -12,7 +12,8 @@ def _migrate_from_txt_to_json():
         with open(REPOS_FILE_TXT_OLD, 'r') as f:
             urls = [line.strip() for line in f if line.strip()]
         
-        repos = [{'name': url, 'url': url} for url in urls]
+        # Add 'path': None to maintain data structure consistency
+        repos = [{'name': url, 'url': url, 'path': None} for url in urls]
         save_frequent_repos(repos)
         os.remove(REPOS_FILE_TXT_OLD)
         print("Migration successful.")
@@ -40,12 +41,19 @@ def save_frequent_repos(repos):
         json.dump(repos, f, indent=4)
 
 def add_frequent_repo(repo_to_add):
-    """Adds a repository to the frequent list, avoiding duplicate URLs."""
+    """Adds a repository to the frequent list, or updates the path if it already exists."""
     repos = load_frequent_repos()
     # Check if a repo with the same URL already exists
-    if not any(repo['url'] == repo_to_add['url'] for repo in repos):
+    existing_repo = next((repo for repo in repos if repo.get('url') == repo_to_add.get('url')), None)
+
+    if existing_repo:
+        # If it exists, update its path
+        existing_repo['path'] = repo_to_add.get('path')
+    else:
+        # Otherwise, add the new repo
         repos.append(repo_to_add)
-        save_frequent_repos(repos)
+    
+    save_frequent_repos(repos)
 
 def remove_frequent_repo(index):
     """Removes a repository from the frequent list by its index (0-based)."""
