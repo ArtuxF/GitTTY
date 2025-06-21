@@ -15,6 +15,7 @@ from modules.user_interface import (
     browse_frequent_repos,
     get_repo_action_interactively,
     display_repo_details,
+    browse_online_repositories,
 )
 from modules.git_operations import (
     clone_repository,
@@ -68,11 +69,12 @@ def run_interactive_mode():
         while True:
             print("\n--- Main Menu ---")
             print("1. Clone a new repository")
-            print("2. Select from frequent repositories to clone")
-            print("3. Manage frequent repositories")
-            print("4. Update an existing repository")
-            print("5. Settings")
-            print("6. Update GitTTY")
+            print("2. Select from frequent repositories")
+            print("3. Browse online repositories (GitHub/GitLab)")
+            print("4. Manage frequent repositories")
+            print("5. Update an existing repository")
+            print("6. Settings")
+            print("7. Update GitTTY")
             print("q. Quit")
             print("-------------------")
 
@@ -120,9 +122,19 @@ def run_interactive_mode():
                 else:
                     continue  # No repo selected, go back to main menu
             elif choice == "3":
+                if not check_connectivity():
+                    continue
+                
+                # Browse online repositories
+                online_repo_url = browse_online_repositories()
+                if online_repo_url:
+                    repo_url = online_repo_url
+                else:
+                    continue
+            elif choice == "4":
                 manage_frequent_repos()
                 continue
-            elif choice == "4":
+            elif choice == "5":
                 if not check_connectivity():
                     continue
 
@@ -156,10 +168,10 @@ def run_interactive_mode():
                     print("Invalid selection.")
 
                 continue
-            elif choice == "5":
+            elif choice == "6":
                 manage_settings()
                 continue
-            elif choice == "6":
+            elif choice == "7":
                 if not check_connectivity():
                     continue
                 gittty_repo_path = get_repo_root()

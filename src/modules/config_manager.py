@@ -146,3 +146,41 @@ def set_theme(theme_name):
     config = load_config()
     config["theme"] = theme_name
     save_config(config)
+
+
+def get_api_tokens():
+    """Gets the stored API tokens from the config."""
+    config = load_config()
+    return config.get("api_tokens", {})
+
+
+def set_api_token(service, token):
+    """Sets an API token for a service in the config."""
+    config = load_config()
+    if "api_tokens" not in config:
+        config["api_tokens"] = {}
+    config["api_tokens"][service] = token
+    save_config(config)
+
+
+def remove_api_token(service):
+    """Removes an API token for a service from the config."""
+    config = load_config()
+    if "api_tokens" in config and service in config["api_tokens"]:
+        del config["api_tokens"][service]
+        save_config(config)
+        return True
+    return False
+
+
+def get_gitlab_url():
+    """Gets the custom GitLab URL from the config."""
+    config = load_config()
+    return config.get("gitlab_url", "https://gitlab.com")
+
+
+def set_gitlab_url(url):
+    """Sets a custom GitLab URL in the config."""
+    config = load_config()
+    config["gitlab_url"] = url.rstrip("/")
+    save_config(config)

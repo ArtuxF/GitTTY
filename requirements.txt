@@ -1,2 +1,4 @@
 prompt_toolkit
 fuzzywuzzy[speedup]
+rich>=10.0.0
+requests>=2.25.0

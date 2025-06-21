@@ -22,9 +22,20 @@ GitTTY is a robust and user-friendly TTY tool designed for emergency situations 
     *   View detailed repository information (URL, local path, etc.)
     *   Remove repositories from your frequent list
     *   **Search functionality**: Quickly find repositories using fuzzy search (supports partial matches and typos)
-*   **Customizable Themes**: Choose from 7 predefined color themes (Default, Dark, Light, Cyberpunk, Ocean, Forest, Monochrome) or use a monochrome mode for terminals without color support.
+*   **GitHub/GitLab Integration**: Connect your GitHub and GitLab accounts to:
+    *   Browse your repositories directly from GitTTY
+    *   View repository details, stars, and language information
+    *   Clone repositories with a single command
+    *   Add discovered repositories to your frequent list
+    *   Support for both public and private repositories
+    *   Custom GitLab instance support for self-hosted environments
 *   **Smart Repository Detection**: Automatically detects if a destination directory is already a Git repository and offers to pull updates instead of cloning.
-*   **Visual Progress Indicators**: Spinner animations during long-running operations like cloning and pulling to provide real-time feedback.
+*   **Visual Progress Indicators**: Advanced progress bars during long-running operations like cloning and pulling that show:
+    *   Real-time progress percentage and completion status
+    *   Transfer speeds and data amounts
+    *   Separate progress tracking for different Git operations (receiving objects, resolving deltas)
+    *   Time elapsed and estimated time remaining
+    *   Graceful fallback to simple spinners when advanced features aren't available
 *   **Auto-Stash Integration**: When pulling updates, if local changes would be overwritten, GitTTY offers to automatically stash changes, pull, and reapply them.
 *   **Self-Update**: Update GitTTY to the latest version directly from the main menu.
 *   **Post-Clone Script Execution**: Automatically run an installation or setup script right after cloning.
@@ -53,7 +64,16 @@ GitTTY is a robust and user-friendly TTY tool designed for emergency situations 
     ```bash
     pip install .
     ```
-    This will also install the required `prompt-toolkit` dependency and make the `gittty` command available in your environment.
+    This will install the required dependencies (`prompt-toolkit`, `fuzzywuzzy`, `rich`) and make the `gittty` command available in your environment.
+
+### Optional Dependencies
+
+For the best experience with advanced features:
+
+*   **Enhanced Search**: `pip install fuzzywuzzy[speedup]` - Enables fuzzy search with better performance
+*   **Advanced Progress Bars**: `pip install rich` - Provides detailed progress bars with transfer speeds and time estimates
+*   **API Integration**: `pip install requests` - Enables GitHub and GitLab API connectivity
+*   **Complete Experience**: All dependencies are included in the main installation for full functionality
 
 ## Usage
 
@@ -63,7 +83,20 @@ Once installed, simply run the command:
 gittty
 ```
 
-This will launch the interactive main menu.
+This will launch the interactive main menu with options to clone, browse online repositories, manage settings, and more.
+
+1. **Set up API tokens** (optional but recommended):
+   - **GitHub**: Go to Settings → Developer settings → Personal access tokens → Generate new token
+   - **GitLab**: Go to User Settings → Access Tokens → Create new token
+   - In GitTTY: Settings → API integrations → Configure tokens
+
+2. **Browse and clone**:
+   ```bash
+   gittty
+   # Select "3. Browse online repositories"
+   # Choose GitHub or GitLab
+   # Browse your repositories and clone with one command
+   ```
 
 ### Non-Interactive Use
 
@@ -85,10 +118,13 @@ GitTTY is built with a modular architecture in Python:
 
 *   **Enhanced Repository Management**: Detailed view and management options for frequent repositories with integrated search functionality
 *   **Smart Conflict Resolution**: Automatic stash/unstash workflow for handling local changes during pulls
-*   **Visual Feedback**: Real-time progress indicators during Git operations
+*   **Advanced Progress Visualization**: Rich progress bars showing real-time transfer speeds, completion percentages, and time estimates
 *   **Flexible Configuration**: Customizable default clone directory and theme selection through the Settings menu
 *   **Intelligent Directory Handling**: Automatic detection of existing Git repositories with pull suggestions
 *   **Search & Discovery**: Fuzzy search through your frequent repositories with tolerance for typos and partial matches
 *   **Theme System**: Multiple color schemes to customize the visual experience for different terminal preferences
+*   **Enhanced Visual Experience**: Improved UI with better formatting, emojis, and rich text when supported
+*   **API Integration**: Direct integration with GitHub and GitLab APIs for seamless repository browsing and management
+*   **Cloud Repository Access**: Browse, search, and clone repositories directly from your connected accounts
 
 This structure makes the tool easy to maintain and extend while providing a smooth user experience even in emergency TTY-only scenarios.
