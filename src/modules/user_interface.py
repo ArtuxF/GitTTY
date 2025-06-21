@@ -286,6 +286,8 @@ def manage_settings():
 
 def manage_theme_settings():
     """Manage theme settings."""
+    global colors  # Declare global at the beginning of the function
+    
     current_theme = get_theme()
     available_themes = get_available_themes()
     
@@ -312,7 +314,6 @@ def manage_theme_settings():
                     set_theme(selected_theme)
                     print(f"{colors.OKGREEN}Theme changed to '{selected_theme}'. Changes will take effect immediately.{colors.ENDC}")
                     # Force reload colors by creating a new instance
-                    global colors
                     colors = Colors()
                 else:
                     print(f"{colors.WARNING}Theme '{selected_theme}' is already selected.{colors.ENDC}")
